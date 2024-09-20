@@ -1,0 +1,38 @@
+{
+  "name": "@jtjs/view",
+  "version": "2.0.0",
+  "description": "Utilities that are useful in situations where there's a view of any kind. This library isn't dependent on a browser environment, but plays nicely with one.",
+  "type": "module",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/jtjs_view.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/jtjs_view.js"
+      }
+    }
+  },
+  "types": "./dist/types/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && npm run build:types",
+    "build:types": "tsc --project tsconfig.build.json",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "peerDependencies": {
+    "@jtjs/event": "^2.0.0",
+    "chroma-js": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/chroma-js": "^2.4.4",
+    "@types/node": "^20.16.5",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.1",
+    "vitest": "^2.1.1"
+  }
+}
