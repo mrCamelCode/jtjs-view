@@ -1,5 +1,5 @@
 import { Event } from '@jtjs/event';
-import chroma from 'chroma-js';
+import { hexToHsl, hslToHex } from '../color.util';
 import { Theme } from '../model/theme.model';
 
 export type OnChangeThemeListener = (theme: Theme) => void;
@@ -96,7 +96,7 @@ export class ThemeService {
   static defaultTheme: Theme = ThemeService.dark;
 
   private static get isBrowser(): boolean {
-    return !!document;
+    return !!globalThis.document;
   }
 
   private static _themes: Theme[] = [];
@@ -161,10 +161,7 @@ export class ThemeService {
    */
   // Note: Maybe instead of requiring that they call this, just use a proxy that watches
   // for sets to the object fields and triggers the event when one changes?
-  static updateTheme(
-    themeName: string,
-    newThemeData: Partial<Omit<Theme, 'name'>>
-  ) {
+  static updateTheme(themeName: string, newThemeData: Partial<Omit<Theme, 'name'>>) {
     const theme = ThemeService.getTheme(themeName);
 
     if (theme) {
@@ -177,31 +174,31 @@ export class ThemeService {
   /**
    * Lightens a hex color.
    *
-   * @param color - The color to lighten
+   * @param hexColor - The color to lighten, expressed in hex.
    * @param amount - The amount by which to lighten the color. This is a value
    * between 0-1. The default for this value is the same value used by the service to generate
    * lightened color variants for theme colors.
    *
    * @returns The lightened color.
    */
-  static lighten(color: string, amount = 0.1): string {
-    const c = chroma(color);
+  static lighten(hexColor: string, amount = 0.1): string {
+    const hsl = hexToHsl(hexColor);
 
-    return c.set('hsl.l', c.get('hsl.l') + amount).hex();
+    return hslToHex({ ...hsl, lightness: hsl.lightness + amount });
   }
 
   /**
    * Darkens a hex color.
    *
-   * @param color - The color to darken
+   * @param hexColor - The color to lighten, expressed in hex.
    * @param amount - The amount by which to darken the color. This is a value
    * between 0-1. The default for this value is the same value used by the service to generate
    * darkened color variants for theme colors.
    *
    * @returns The darkened color.
    */
-  static darken(color: string, amount = 0.1) {
-    return ThemeService.lighten(color, -amount);
+  static darken(hexColor: string, amount = 0.1) {
+    return ThemeService.lighten(hexColor, -amount);
   }
 
   private static getTheme(themeName: string): Theme | undefined {
@@ -222,14 +219,8 @@ export class ThemeService {
     Object.entries(ThemeService._currentTheme).forEach(([themeKey, color]) => {
       if (themeKey !== 'name' && color) {
         root.style.setProperty(`--jtjs-theme-${themeKey}`, color);
-        root.style.setProperty(
-          `--jtjs-theme-${themeKey}-darkened`,
-          ThemeService.darken(color)
-        );
-        root.style.setProperty(
-          `--jtjs-theme-${themeKey}-lightened`,
-          ThemeService.lighten(color)
-        );
+        root.style.setProperty(`--jtjs-theme-${themeKey}-darkened`, ThemeService.darken(color));
+        root.style.setProperty(`--jtjs-theme-${themeKey}-lightened`, ThemeService.lighten(color));
       }
     });
   }
